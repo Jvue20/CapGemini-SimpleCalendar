@@ -80,11 +80,20 @@ def get_date_input(prompt, allow_empty=False):
         for date_format in date_formats:
             try:
                 parsed_date = datetime.strptime(user_input, date_format).date()
+                
+                # Prevent scheduling events in the past - users shouldn't be able to
+                # create appointments for dates that have already occurred
+                if parsed_date < datetime.now().date():
+                    print("  Cannot schedule events in the past. Please enter today's date or a future date.")
+                    break
+                
                 return parsed_date
             except ValueError:
                 continue
-        
-        print("  Invalid date format. Please use MM-DD-YYYY or MM/DD/YYYY")
+        else:
+            # This else belongs to the for loop - it only runs if no format matched
+            # (i.e., the loop completed without breaking due to a past date rejection)
+            print("  Invalid date format. Please use MM-DD-YYYY or MM/DD/YYYY")
 
 
 def get_time_input(prompt, date):
@@ -155,10 +164,20 @@ def create_event_flow(calendar):
     
     # Get the start time
     print(f"\n  Date selected: {event_date.strftime('%A, %B %d, %Y')}")
-    start_time = get_time_input("  Start time (e.g., 9:00 AM): ", event_date)
-    if start_time is None:
-        print("  Event creation cancelled.")
-        return
+    
+    while True:
+        start_time = get_time_input("  Start time (e.g., 9:00 AM): ", event_date)
+        if start_time is None:
+            print("  Event creation cancelled.")
+            return
+        
+        # If the user selected today's date, make sure the start time hasn't already passed
+        # since it doesn't make sense to schedule an event that's already in the past
+        if event_date == datetime.now().date() and start_time < datetime.now():
+            print("  Cannot schedule events in the past. Please enter a future time.")
+            continue
+        
+        break
     
     # Get the end time
     end_time = get_time_input("  End time (e.g., 10:00 AM): ", event_date)
