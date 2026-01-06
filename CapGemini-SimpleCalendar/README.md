@@ -200,11 +200,6 @@ No existing calendar data found. Starting with empty calendar.
 
 4. **Flexible Input Parsing**: The application accepts multiple date and time formats for user convenience.
 
-## Author
 
-Created as a technical interview project.
 
-## License
-
-This project is open source and available for educational purposes.
 
